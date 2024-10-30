@@ -27,9 +27,9 @@
 ;     access(read_only, 2),
 ;     hot
 ; )) __fastcall void* FuncArch(memcpyK, 64) (
-;     void *dest,       -> rcx
-;     const void *src,  -> rdx
-;     size_t len        -> r8
+;     void *dest,       -> win(rcx) / lin(rdi)
+;     const void *src,  -> win(rdx) / lin(rsi)
+;     size_t len        -> win(r8) / lin(rdx)
 ; );
 
 global memcpyK64
@@ -71,10 +71,10 @@ check_support:
     cpuid
 
     ; comprovar que extensiones AVX512 estan soportadas
-    bt ecx, 28              ; AVX512CD
-    jnc .no_AVX512CD_support
-    bt ebx, 31              ; AVX512VL
-    jnc .no_AVX512VL_support
+    ;bt ecx, 28              ; AVX512CD  // no se necesita para este codigo
+    ;jnc .no_AVX512CD_support
+    ;bt ebx, 31              ; AVX512VL
+    ;jnc .no_AVX512VL_support
     bt ebx, 16              ; AVX512F
     jnc .no_AVX512F_support
 
@@ -85,10 +85,10 @@ check_support:
     .no_avx512_support:
         .no_AVX512F_support:
             mov r10, 1 ; devolver 1 como code error
-        .no_AVX512CD_support:
-            mov r10, 2 ; devolver 2 como code error
-        .no_AVX512VL_support:
-            mov r10, 3 ; devolver 3 como code error
+        ;.no_AVX512CD_support:
+        ;    mov r10, 2 ; devolver 2 como code error
+        ;.no_AVX512VL_support:
+        ;    mov r10, 3 ; devolver 3 como code error
 
     ; si AVX512F no se admite loop_512 no se puede usar
     ; comprobar si se soporta AVX
@@ -142,9 +142,22 @@ check_support:
     ret
 
 memcpyK64:
+    %ifdef WIN64
     push rcx
     push rdx
     push r8
+    %elifdef WIN32
+    %error "No se admite la arquitectura de 32 bits"
+    %elifdef LIN64
+    ; para linux:
+    push rdi
+    push rsi
+    push rdx
+    %elifdef LIN32
+        %error "No se admite la arquitectura de 32 bits"
+    %else 
+        %error "No se declaro WIN64-WIN32-LIN64-LIN32"
+    %endif
     call check_support
     pop r8
     pop rdx
@@ -367,3 +380,8 @@ memcpyK64:
         pop rax
 
         ret
+
+
+
+
+
