@@ -74,6 +74,14 @@ memcpyK64:
 .avx512f_copy:
     cmp rdx, 512
     jb .avx_copy
+    ; Alinear el destino a 64 bytes si es necesario
+    mov rcx, rdi
+    and rcx, 63
+    jz .avx_loop
+    neg rcx
+    add rcx, 64
+    sub rdx, rcx
+    rep movsb
 .avx512f_loop:
     prefetchnta [rsi + 1024]
     vmovdqa64 zmm0, [rsi]
@@ -102,6 +110,14 @@ memcpyK64:
 .avx_copy:
     cmp rdx, 256
     jb .sse_copy
+    ; Alinear el destino a 32 bytes si es necesario
+    mov rcx, rdi
+    and rcx, 31
+    jz .avx_loop
+    neg rcx
+    add rcx, 32
+    sub rdx, rcx
+    rep movsb
 .avx_loop:
     prefetchnta [rsi + 512]
     vmovdqa ymm0, [rsi]
@@ -131,6 +147,14 @@ memcpyK64:
 .sse_copy:
     cmp rdx, 128
     jb .small_copy
+    ; Alinear el destino a 16 bytes si es necesario
+    mov rcx, rdi
+    and rcx, 15
+    jz .sse_loop
+    neg rcx
+    add rcx, 16
+    sub rdx, rcx
+    rep movsb
 .sse_loop:
     prefetchnta [rsi + 256]
     movdqa xmm0, [rsi]
