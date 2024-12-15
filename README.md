@@ -52,4 +52,8 @@ Socket 1			ID = 0
 
 ```
 
+Puede usar la flag `-D` para especificar para que plataforma quiere compiar: `WIN64-WIN32-ELF64-ELF32`, para compilar para windows use `-DWIN64` y asi con cada una.
+
+Le version de 32bits no hace distincion entre `WIN64-WIN32-ELF64-ELF32`.
+
 ----
