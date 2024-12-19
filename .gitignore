@@ -1,0 +1,15 @@
+*.exe
+*.zip
+*.o
+*.dmp
+*.exe
+*.lst
+.vscode
+.dist
+*.obj
+*.e
+*.rar
+*.zip
+*.pyc
+*.elf
+enums_hashing
